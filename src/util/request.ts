@@ -1,5 +1,7 @@
 import { DsApiData, DsResponse } from '@/types/request.types';
 
+const DEFAULT_REQUEST_TIMEOUT_MS = 10000;
+
 /**
  * Parses and formats a fetch API response to a standardized response object.
  * @param {Response} response - The response object from the fetch API.
@@ -23,7 +25,12 @@ async function formatDsResponse<T>(response: Response): Promise<DsResponse<T>> {
  * @throws {Error} Throws an error if the fetch response contains a client or server error status.
  */
 export async function request<T>(requestUrl: string, params: RequestInit): Promise<DsResponse<T>> {
-  const response = await fetch(requestUrl, params);
+  const requestParams = {
+    ...params,
+    signal: AbortSignal.timeout(DEFAULT_REQUEST_TIMEOUT_MS)
+  };
+
+  const response = await fetch(requestUrl, requestParams);
 
   const formattedResponse = await formatDsResponse<T>(response);
 
