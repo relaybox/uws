@@ -2,6 +2,10 @@ import { JobsOptions, Queue } from 'bullmq';
 import { connectionOptionsIo } from '@/lib/redis';
 
 const SESSION_QUEUE_NAME = 'session';
+const SESSION_QUEUE_PREFIX = 'queue';
+const RETRY_BACKOFF_RATE_MS = 500;
+const RETRY_MAX_ATTEMPTS = 3;
+const RETRY_BACKOFF_TYPE = 'exponential';
 
 const defaultQueueConfig = {
   streams: {
@@ -21,16 +25,21 @@ export enum SessionJobName {
 }
 
 export const defaultJobConfig: JobsOptions = {
+  attempts: RETRY_MAX_ATTEMPTS,
+  backoff: {
+    type: RETRY_BACKOFF_TYPE,
+    delay: RETRY_BACKOFF_RATE_MS
+  },
   removeOnComplete: true,
   removeOnFail: false
 };
 
 export const sessionQueue = new Queue(SESSION_QUEUE_NAME, {
   connection: connectionOptionsIo,
-  prefix: 'queue',
+  prefix: SESSION_QUEUE_PREFIX,
   ...defaultQueueConfig
 });
 
 sessionQueue.on('error', (err) => {
-  console.log(`BULLMQ ERROR >>>>>>>>>>>>>>>>>>>>>>>> Session queue error`, { err });
+  console.log(`Session queue error`, { err });
 });

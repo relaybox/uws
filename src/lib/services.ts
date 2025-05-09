@@ -66,6 +66,7 @@ export default class Services {
   private getPgPool(): Pool | null {
     return getPgPool();
   }
+
   private getRedisClient(): RedisClient {
     return getRedisClient();
   }
